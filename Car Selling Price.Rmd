@@ -1,0 +1,85 @@
+---
+title: "Car Selling Price"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(readr)
+library(pander)
+library(DT)
+library(car)
+car <- read.csv("../Data/car1.csv")
+```
+
+## Summary
+
+For this analysis I collected data about the price and mileage for a 2018 Subaru WRX. I collected 99 different data points for used WRX's using cargurus.com. These are the data points below:
+
+
+```{r echo=FALSE}
+car.lm <- lm(Mileage ~ Price, data = car)
+car.lm.t <- lm(sqrt(Mileage) ~ Price, data = car)
+plot(Mileage ~ Price, data = car)
+```
+
+
+## BoxCox Estimation
+```{r echo=FALSE}
+boxCox(car.lm)
+```
+
+$\lambda = 0.5$, so we'll use $Y' = \sqrt{Y}$. Our equation will be: 
+$$
+  \sqrt{\hat{Y}_i} = 553.527387 - 0.016900 X_i
+$$
+This translates to:
+$$
+  \hat{Y}_i = (553.527387 - 0.016900 X_i)^2
+$$
+
+```{r echo=FALSE}
+pander(summary(car.lm.t))
+```
+
+## Graph with transformed line
+
+This graph shows us our transformed line using the square root. I also added two points of data, one point represents what I bought my WRX for and the other point represents what how many miles I'll sell it with. The dotted red line represents our original linear regression without the transformation.
+
+```{r echo=FALSE}
+#Graph with transformed line
+plot(Mileage ~ Price, data = car)
+curve((553.527387 + -0.016900*x)^2, add = TRUE, col = "skyblue", lwd = 2)
+abline(car.lm, col = "firebrick", lty = 2)
+
+#Where the car was bought and where it will sell
+y = points(20000, 46500, col = "darkgreen", pch = 2)
+x = points(22000, 0, col = "darkgreen", pch = 2)
+segments(22000, 0, 20000, 46500, lty = 2)
+text(20000, 46500, labels = "Sell", pos = 4)
+text(22000, 0, labels = "Bought", pos = 4)
+```
+
+## Interpretation
+
+According to our transformed line using the square root, we are able to say with accuracy that a 2018 Subaru WRX will lose $0.02 per mile. This data was hard to work with and looks a little funky because Subaru WRX's don't depreciate much. There price usually hovers around $22,000 - $24,000. I also was able to buy my car at $22,000 due to shrewd negotiating, in addition where we live we have the worst traffic in the nation so no one wants to buy a stick shift car except for me! Since I bought it for $22,000 with no miles on it, according to the graph it'll stay around that price till a little under 40,000 miles on the clock. I plan on selling the car at around 46,000 miles which means I would be able to sell it for $20,000 on average and only lose $2,000.
+
+## Prediction Intervals
+
+```{r echo=FALSE}
+plot(Mileage ~ Price, data = car)
+curve((553.527387 + -0.016900*x)^2, add = TRUE, col = "skyblue", lwd = 2)
+abline(car.lm, col = "firebrick", lty = 1)
+abline(h=predict(car.lm, data.frame(Price = 22000), interval = "prediction"), lty=2, col ="red", v=22000)
+abline(h=predict(car.lm.t, data.frame(Price = 22000), interval = "prediction")^2, lty=2, col ="skyblue", v=22000)
+```
+
+A WRX with a price of $22,000, what I wish to get out of my car when I do decide to sell, should be between 18,000 miles and 56,000 miles. The is found by doing a prediction using the individual data according to my transformed line. This is shown on the graph via the blue dashed lines. The red dashed lines are the prediction value based on the regular regression. It predicts that the car will have a mileage of 19,000 miles and 50,000 miles.
+
+## Credit
+
+Thank you to cargurus.com! 

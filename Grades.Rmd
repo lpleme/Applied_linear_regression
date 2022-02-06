@@ -1,0 +1,38 @@
+---
+title: "House Selling"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(readr)
+library(pander)
+library(DT)
+grades <- read.csv("../Data/Math325Grades_Train.csv")
+Test1 <- read.csv("../Data/Test1.csv")
+```
+
+## Background
+
+We were given the data for past Math 325 classes and what their final grade was and how they achieved on the analysis and also the skill quizzes. In this analysis we are hoping to find a way to tell if a student will get an A in the class depending on how they do on this assignments. I chose to look at the Analysis Total because in my personal opinion I think that this is the most important factor of the Math 325 course.
+
+## Data
+
+```{r echo=FALSE}
+plot(AnalysisTotal~FinalGrade, data = grades)
+
+grades.lm <- glm(FinalGrade ~ AnalysisTotal, data= grades, family = binomial)
+
+summary(grades.lm)
+
+grades1.lm <- glm(FinalGrade ~ AnalysisTotal, data = grades, family = binomial)
+```
+
+```{r include=FALSE}
+Test1$FinalGrade <- ifelse(predict(grades.lm, Test1, type="response") > 25, "A", "Other")
+write.csv(Test1, "Test2.csv", row.names=FALSE)
+```
+
+## Interpretation
+
+If you were to score above a 25 on your total score for you analyses then you have a high chance of scoring an A for Math 325 for the whole semester. This makes sense because the Analysis is the way to show that you truly understand the concept and allows you to put everything into practice. This is further supported hench the AIC of 66.879 within the logistic regression of this data. So if you want to highly achieve in Math 325 you should make sure you try hard onyour analysis.

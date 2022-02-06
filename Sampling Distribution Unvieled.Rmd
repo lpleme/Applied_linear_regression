@@ -1,0 +1,188 @@
+---
+title: "Sampling Distributions Unvieled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(readr)
+library(pander)
+library(DT)
+library(car)
+```
+
+
+## Sampling Distributions {.tabset .tabset-dropdown}
+
+The sampling distribution is based on the distribution of frequencies within our sample size. Stated from the law of large numbers, when we have a bigger sample size then we will have a normal distribution and mean.
+
+Below in the drop down menus you can see a simulation of the sampling distribution for both the intercept and slope are for 1000 samples and 10 samples.
+
+Switching among the two sample sizes you can spot the main difference, the standard error is significantly bigger in the distribution samples with a smaller sample size. This is because there is more variance with a smaller group of samples. When you are given a large group of samples that variance will lessen because of the sheer numbe of different data points. This is evident by the smallar standard error in the distribution samples with a larger sample size.
+
+### 1000 Samples
+
+```{r}
+n <- 1000 
+Xstart <- 30 
+Xstop <- 100 
+
+beta_0 <- 2 
+beta_1 <- 3.5 
+sigma <- 13.8 
+
+```
+
+
+
+```{r, fig.height=8, fig.width=8}
+X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2) 
+N <- 5000 
+storage_b0 <- storage_b1 <- storage_rmse <- rep(NA, N)
+for (i in 1:N){
+  Y <- beta_0 + beta_1*X + rnorm(n, 0, sigma) 
+  mylm <- lm(Y ~ X)
+  storage_b0[i] <- coef(mylm)[1]
+  storage_b1[i] <- coef(mylm)[2]
+  storage_rmse[i] <- summary(mylm)$sigma
+}
+
+
+layout(matrix(c(1,1,2,2), 2, 2, byrow = FALSE), widths=c(1,1), heights=c(2,2))
+
+
+
+  addnorm <- function(m,s, col="firebrick"){
+    curve(dnorm(x, m, s), add=TRUE, col=col, lwd=2)
+    lines(c(m,m), c(0, dnorm(m,m,s)), lwd=2, col=col)
+    lines(rep(m-s,2), c(0, dnorm(m-s, m, s)), lwd=2, col=col)
+    lines(rep(m-2*s,2), c(0, dnorm(m-2*s, m, s)), lwd=2, col=col)
+    lines(rep(m-3*s,2), c(0, dnorm(m-3*s, m, s)), lwd=2, col=col)
+    lines(rep(m+s,2), c(0, dnorm(m+s, m, s)), lwd=2, col=col)
+    lines(rep(m+2*s,2), c(0, dnorm(m+2*s, m, s)), lwd=2, col=col)
+    lines(rep(m+3*s,2), c(0, dnorm(m+3*s, m, s)), lwd=2, col=col)
+    legend("topleft", legend=paste("Std. Error = ", round(s,3)), cex=0.7, bty="n")
+  }
+
+  h0 <- hist(storage_b0, 
+             col="darkseagreen1", 
+             main="Sampling Distribution\n Y-intercept",
+             freq=FALSE, yaxt='n', ylab="")
+  m0 <- mean(storage_b0)
+  s0 <- sd(storage_b0)
+  addnorm(m0,s0)
+  
+  h1 <- hist(storage_b1, 
+             col="darkseagreen1", 
+             main="Sampling Distribution\n Slope",
+             freq=FALSE, yaxt='n', ylab="")
+  m1 <- mean(storage_b1)
+  s1 <- sd(storage_b1)
+  addnorm(m1,s1)
+```
+
+
+
+### 10 Samples
+
+```{r}
+n <- 10
+```
+
+
+
+```{r, fig.height=8, fig.width=8}
+X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2) 
+N <- 5000
+storage_b0 <- storage_b1 <- storage_rmse <- rep(NA, N)
+for (i in 1:N){
+  Y <- beta_0 + beta_1*X + rnorm(n, 0, sigma) 
+  mylm <- lm(Y ~ X)
+  storage_b0[i] <- coef(mylm)[1]
+  storage_b1[i] <- coef(mylm)[2]
+  storage_rmse[i] <- summary(mylm)$sigma
+}
+
+
+layout(matrix(c(1,1,2,2), 2, 2, byrow = FALSE), widths=c(1,1), heights=c(2,2))
+
+
+
+  addnorm <- function(m,s, col="firebrick"){
+    curve(dnorm(x, m, s), add=TRUE, col=col, lwd=2)
+    lines(c(m,m), c(0, dnorm(m,m,s)), lwd=2, col=col)
+    lines(rep(m-s,2), c(0, dnorm(m-s, m, s)), lwd=2, col=col)
+    lines(rep(m-2*s,2), c(0, dnorm(m-2*s, m, s)), lwd=2, col=col)
+    lines(rep(m-3*s,2), c(0, dnorm(m-3*s, m, s)), lwd=2, col=col)
+    lines(rep(m+s,2), c(0, dnorm(m+s, m, s)), lwd=2, col=col)
+    lines(rep(m+2*s,2), c(0, dnorm(m+2*s, m, s)), lwd=2, col=col)
+    lines(rep(m+3*s,2), c(0, dnorm(m+3*s, m, s)), lwd=2, col=col)
+    legend("topleft", legend=paste("Std. Error = ", round(s,3)), cex=0.7, bty="n")
+  }
+
+  h0 <- hist(storage_b0, 
+             col="darkseagreen1", 
+             main="Sampling Distribution\n Y-intercept",
+             freq=FALSE, yaxt='n', ylab="")
+  m0 <- mean(storage_b0)
+  s0 <- sd(storage_b0)
+  addnorm(m0,s0)
+  
+  h1 <- hist(storage_b1, 
+             col="darkseagreen1", 
+             main="Sampling Distribution\n Slope",
+             freq=FALSE, yaxt='n', ylab="")
+  m1 <- mean(storage_b1)
+  s1 <- sd(storage_b1)
+  addnorm(m1,s1)
+```
+
+
+## P-Values
+A P-value is the estimate of the null hypothesis and wether it's correct or not. The P-value uses our test statistic and our distribution. You can measure a P-value as long as you have a T-value and a distribution sample, we'll show that below.
+
+
+
+We'll use the cars data set regression with the variables stopping distance and speed to demonstrate how to find P-value with R.
+```{r echo=FALSE}
+cars.lm <- lm(dist ~ speed, data=cars)
+summary(cars.lm)
+```
+
+In R we have the pt function which measures p-value for one tail. We can insert out T-value into the equation with our degrees of freedom. Since we want a two tailed P-value we'll multiply the whole equation by 2.
+
+```{r echo=FALSE}
+curve(dt(x, 3), from=-4, to=4, lwd=2)
+curve(dnorm(x), add=TRUE, col="gray")
+abline(h=0, v=c(-2.601,2.601), col=c("gray","orange","orange"), lwd=c(1,2,2))
+pt(-2.601, 48)*2
+```
+This is our P-value for the intercept of the car regression.
+
+## Confidence Intervals
+
+Your confidience interval is the estimate, for either the slope of intercept, plus and minus the standard error. Confidence interval is the measure of the estimate within each standard deviation within the data. This can be found my subtracting your standard error multiplied by 2, or whatever confidence interval you are trying to find, and subtracting and adding that value to the estimate.
+
+Confidence intervals are found from the following formula:
+$$
+  b_1 \pm t^*_{n-2}\cdot s_{b_1}
+$$
+
+$$
+  b_0 \pm t^*_{n-2}\cdot s_{b_0}
+$$
+
+In short, the formula called for the critical value from the T-distribution to be multiplied by n - 2 (you degrees of freedom).
+
+For example, here's the linear regression summary for the cars dataset using the variables stopping distance and speed.
+
+```{r echo=FALSE}
+cars.lm <- lm(dist ~ speed, data=cars)
+summary(cars.lm)
+```
+
+With this information we can write an equation in R to find the confidence interval at 95% for the slope using the standard error. We will multiply the standard error by 2, this will give us 0.831. Now we will use that number to subtract and add to the estimate. The confidence interval for the slope would be 3.101 and 4.763. We can use the same idea for the intercept. Multiply the intercepts standard error by 2. We get 13.5168, so now we'll use that to subtract and add to the estimate of the intercept. By doing this we get our confidence interval as -31.096 and -4.062.

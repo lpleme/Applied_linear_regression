@@ -1,0 +1,77 @@
+---
+title: "Regression Battleship - Final Guess"
+author: "Lorenzo Leme"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r}
+library(pander)
+# Read in the RBdata here:
+rbdata <- read.csv("Saunders_Fall19_RBdata.csv", header=TRUE)
+```
+
+## The Model of your Guess
+
+<!-- Enter your guessed model in the math notation below. -->
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{1i}^2X_{2i} +  \beta_2 X_{2i}^2X_{1i} + \beta_3 X{2i}^3X_{1i} + \beta_4 X_{3i}X_{2i} + \epsilon_i
+$$
+
+
+## The lm(...) of your Guess
+
+<!-- Provide your estimates of each model coefficient along with the Adjusted R-squared of your model:-->
+
+```{r}
+## Input your lm(Y ~ ... ,data=rbdata)
+final.lm <- lm(Y ~ X6 + I(X6^2):X9 + I(X9^2):X6 + I(X9^3):X6 + X10:X9, data = rbdata) #replace the "1" with your model
+```
+
+```{r}
+###################################################################
+#Don't edit this part:
+pander(summary(final.lm)$coefficients)
+```
+
+**Adjusted R-squared**: `r summary(final.lm)$adj.r.squared`
+
+
+## The Plot of your Guess
+
+```{r}
+# Draw a picture of your guess at the model here:
+# Remember, your guess only counts for credit if you plot it.
+
+#Y ~ X6 + I(X6^2):X9 + I(X9^2):X6 + I(X9^3):X6 + X10:X9
+
+plot(Y ~ X6:X6, data = rbdata)
+
+b <- coef(final.lm)
+
+
+curve(b[1]+b[2]*x+b[3]*x^2, add=TRUE, col="black")
+
+curve((b[1]+b[3])+(b[2]+b[4])*x + (b[2]+b[4])*x^2 + b[5]*x^3, add=TRUE, col="red")
+
+curve(b[1] - b[6]*x, add=TRUE, col="blue")
+
+```
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 

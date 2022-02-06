@@ -1,0 +1,278 @@
+---
+title: "Regression Battleship - Creating your Data"
+author: "Lorenzo Leme"
+output: 
+  html_document:
+    theme: cerulean
+---
+
+
+## Creating your Data
+
+Remember the rules...
+
+### Rules
+
+1. Your csv must contain 11 columns of data.
+    * The first column must be your (1) Y-variable (labeled as "Y").
+    * The other ten columns must be (10) X-variables (labeled as "X1", "X2", ... , "X10").
+    
+2. Your Y-variable (or some transformation of the Y-variable) must have been created from a linear regression model using only X-variables (or transformations of those X-variables) from within your data set.
+    * Be very careful with transformations. You must ensure that you do not break the rules of a linear regression if you choose to use transformations.
+    * If you choose transformations, only these functions are allowed when transforming X and Y variables: 1/Y^2, 1/Y, log(Y), sqrt(Y), Y^2, Y^3, 1/X^2, 1/X, log(X), sqrt(X), X^2, X^3, X^4, X^5. Don't forget to check Rule #3 carefully if you choose transformations.
+    
+3. Your sample size must be sufficiently large so that when the true model is fit to your data using lm(...), all p-values of X-variable terms (not including the intercept) found in the summary(...) are significant.
+
+
+### True Model
+
+Write out your final "true" model in mathematical form. Make sure it matches your code.
+
+$$
+  \text{EXAMPLE:} \ Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{1i}^2 + \beta_3 X_{2i} + \beta_4 X_{1i}X_{2i} + \beta_5 X_{1i}^2X_{2i} + \beta_6X_{1i}^3X_{2i} + \epsilon_i
+$$
+
+### The Code to Make the Data
+
+```{r}
+set.seed(122) #This ensures the randomness is the "same" everytime if you play the entire R-chunk as one entire piece of code. If you run lines separately, your data might not come out the same every time.
+
+## To begin, decide on your sample size. (You may have to revise it later to ensure all values in your lm(...) are significant.)
+  
+ n <- 60
+  
+## Then, create 10 X-variables using functions like rnorm(n, mean, sd), rchisq(n, df), rf(n, df1, df2), rt(n, df), rbeta(n, a, b), runif(n, a, b) or sample(c(1,0), n, replace=TRUE)...
+
+ X1 <- runif(n, -80, 50) #replace this
+ X2 <- runif(n, 10, 20) #replace this
+ X3 <- runif(n, 120, 180) #replace this
+ X4 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X5 <- runif(n, 180, 200) #replace this
+ X6 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X7 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X8 <- runif(n, 43, 69) #replace this
+ X9 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X10 <- runif(n, 40, 90) #replace this
+ 
+## Then, create betas, errors (by choosing sigma), and Y
+ 
+beta0 <- 2 
+
+beta1 <- 2 
+
+beta2 <- -4 
+
+beta3 <- -2 
+
+beta4 <- -13 
+
+beta5 <- 5 
+
+beta6 <- 3 
+ 
+sigma <- 5 #change to whatever you want
+ 
+
+ ################################
+ # You CANNOT change this part:
+ errors <- rnorm(n, 0, sigma)
+ ################################ 
+ 
+ #An example of how to make Y...
+ # Y <-  beta0 + beta1*X1 + beta2*X2 + beta3*X4*X2 + errors
+ 
+Y <- beta0 + beta1 * X1 + beta2 * X1^2 + beta3 * X2 + beta4 * X1 * X2 + beta5 * X1^2 * X2 + beta6 * X1^3 * X2 + errors #Change if you want, but this matches our stated mathematic model from above.
+
+  #...edit this code and replace it with your model
+ 
+ # You can include Y' or X' instead of Y or X if you wish.
+ # Remember, only these functions are allowed when transforming
+ # variables: 1/Y^2, 1/Y, log(Y), sqrt(Y), Y^2, Y^3, 1/X^2, 1/X, log(X), sqrt(X), X^2, X^3, X^4, X^5. 
+ #########################################################
+ # ILLEGAL: Y = (beta0 + beta1*X5)^2 + epsilon ###########
+ #########################################################
+ # Legal: sqrt(Y) = beta0 + beta1*X5^2 + epsilon #########
+ #########################################################
+ # You can only transform individual terms, not groups of terms.
+ # And the beta's cannot be part of the transformation.
+
+ 
+ # Load your data into a data set:
+RBdata <- data.frame(Y = Y, X1 = X1, X2 = X2, X3 = X3, X4 = X4, X5 = X5, X6 = X6, X7 = X7, X8 = X8, X9 = X9, X10 = X10) 
+ #In regression battleship you will have up to X10 included.
+ 
+ #Now fit your model to make sure it comes out significant:
+ true.lm <- lm(Y ~ X1 + I(X1^2) + X6 + X1:X6 + I(X1^2):X6 + I(X1^3):X6, data=RBdata) 
+ #see if you can get the correct lm.
+ #edit this code
+ summary(true.lm) 
+ #all p-values must be significant, except "(Intercept)"
+
+```
+
+```{r}
+plot(Y ~ X1, data=RBdata, col=as.factor(X6), pch=16)
+
+b <- coef(true.lm) 
+
+curve(b[1]+b[2]*x+b[3]*x^2, add=TRUE, col="black") #add quadratic model
+
+curve((b[1]+b[4])+(b[2]+b[5])*x + (b[3]+b[6])*x^2 + b[7]*x^3, add=TRUE, col="red") #add cubic model, hint, this one uses all coefficients.
+
+
+
+# Then use curve twice again, but with your original beta's to show the "TRUE" model in dashed lines on the same plot.
+
+
+curve(beta0 + beta1*x + beta2*x^2, add=TRUE, col="grey40", lty=2, lwd=3)
+
+curve((beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*x^2 + beta6*x^3, add=TRUE, lty=2, lwd=3, col="red")
+```
+
+
+  
+```{r}
+# Once you are ready, run this code to write your data to a csv:
+write.csv(RBdata, "RBdata.csv", row.names=FALSE)
+# The above code writes the dataset to your "current directory"
+# To see where that is, use: getwd() in your Console.
+# Find the data set and upload it to I-Learn.
+```
+
+
+```{r}
+set.seed(15) #This ensures the randomness is the "same" everytime if you play the entire R-chunk as one entire piece of code. If you run lines separately, your data might not come out the same every time.
+
+## To begin, decide on your sample size. (You may have to revise it later to ensure all values in your lm(...) are significant.)
+  
+ n <- 60
+  
+## Then, create 10 X-variables using functions like rnorm(n, mean, sd), rchisq(n, df), rf(n, df1, df2), rt(n, df), rbeta(n, a, b), runif(n, a, b) or sample(c(1,0), n, replace=TRUE)...
+
+ X1 <- runif(n, -80, 50) #replace this
+ X2 <- runif(n, 10, 20) #replace this
+ X3 <- runif(n, 120, 180) #replace this
+ X4 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X5 <- runif(n, 180, 200) #replace this
+ X6 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X7 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X8 <- runif(n, 43, 69) #replace this
+ X9 <- sample(c(1,0), n, replace=TRUE) #replace this
+ X10 <- runif(n, 40, 90) #replace this
+ 
+## Then, create betas, errors (by choosing sigma), and Y
+ 
+beta0 <- 2 
+
+beta1 <- 2 
+
+beta2 <- -4 
+
+beta3 <- -2 
+
+beta4 <- -13 
+
+beta5 <- 5 
+
+beta6 <- 3 
+ 
+sigma <- 5 #change to whatever you want
+ 
+
+ ################################
+ # You CANNOT change this part:
+ errors <- rnorm(n, 0, sigma)
+ ################################ 
+ 
+ #An example of how to make Y...
+ # Y <-  beta0 + beta1*X1 + beta2*X2 + beta3*X4*X2 + errors
+ 
+Y <- beta0 + beta1 * X1 + beta2 * X1^2 + beta3 * X2 + beta4 * X1 * X2 + beta5 * X1^2 * X2 + beta6 * X1^3 * X2 + errors #Change if you want, but this matches our stated mathematic model from above.
+
+  #...edit this code and replace it with your model
+ 
+ # You can include Y' or X' instead of Y or X if you wish.
+ # Remember, only these functions are allowed when transforming
+ # variables: 1/Y^2, 1/Y, log(Y), sqrt(Y), Y^2, Y^3, 1/X^2, 1/X, log(X), sqrt(X), X^2, X^3, X^4, X^5. 
+ #########################################################
+ # ILLEGAL: Y = (beta0 + beta1*X5)^2 + epsilon ###########
+ #########################################################
+ # Legal: sqrt(Y) = beta0 + beta1*X5^2 + epsilon #########
+ #########################################################
+ # You can only transform individual terms, not groups of terms.
+ # And the beta's cannot be part of the transformation.
+
+ 
+ # Load your data into a data set:
+RBdata2 <- data.frame(Y = Y, X1 = X1, X2 = X2, X3 = X3, X4 = X4, X5 = X5, X6 = X6, X7 = X7, X8 = X8, X9 = X9, X10 = X10) 
+ #In regression battleship you will have up to X10 included.
+ 
+ #Now fit your model to make sure it comes out significant:
+ true.lm <- lm(Y ~ X1 + I(X1^2) + X6 + X1:X6 + I(X1^2):X6 + I(X1^3):X6, data=RBdata) 
+ #see if you can get the correct lm.
+ #edit this code
+ summary(true.lm) 
+ #all p-values must be significant, except "(Intercept)"
+
+```
+
+```{r}
+#All the lm's
+
+lm.student1 <- lm(Y ~ I(X1^3) + I(X1^3):X6 + I(X1^5):X6, data = RBdata)
+
+lm.student2 <- lm(sqrt(Y) ~ X1 + X1:X6 + I(X1^3):X6, data = RBdata)
+
+lm.s <- lm(Y ~ I(X1^3):X2 + I(X1^2):X2 + X1:X2, data = RBdata)
+
+#true.lm
+
+yht <- predict(lm.student1, newdata=RBdata2)
+
+yhs <- predict(lm.student2, newdata=RBdata2)
+
+yhc <- predict(lm.s, newdata=RBdata2)
+
+ybar <- mean(RBdata2$Y) 
+
+SSTO <- sum( (RBdata2$Y - ybar)^2 ) 
+
+SSEt <- sum( (RBdata2$Y - yht)^2 ) 
+
+SSEs <- sum( (RBdata2$Y - yhs)^2 ) 
+
+SSEc <- sum( (RBdata2$Y - yhc)^2 ) 
+
+rst <- 1 - SSEt/SSTO
+
+rss <- 1 - SSEs/SSTO
+
+rsc <- 1 - SSEc/SSTO
+
+n <- length(RBdata2$Y) 
+
+pl <- length(coef(true.lm))
+
+pt <- length(coef(lm.student1))
+
+ps <- length(coef(lm.student2))
+
+pc <- length(coef(lm.s))
+
+rska <- 1 - (n-1)/(n-pt)*SSEt/SSTO
+
+rsta <- 1 - (n-1)/(n-pt)*SSEt/SSTO
+
+rssa <- 1 - (n-1)/(n-ps)*SSEs/SSTO
+
+rsca <- 1 - (n-1)/(n-pc)*SSEc/SSTO
+
+```
+
+
+| Model   | Original Adjusted $R^2$ | Adjusted $R^2$ |
+|---------|-------|----------------|
+| True    | `r summary(true.lm)$adj.r.squared`  | `r rska` |
+| Keith Tung    | `r summary(lm.student1)$adj.r.squared`  | `r rsta` |
+| Mariah Bradshaw  | `r summary(lm.student2)$adj.r.squared`  | `r rssa` |
+| Bro. Saunders |`r summary(lm.s)$adj.r.squared`  | `r rsca` |

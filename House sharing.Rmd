@@ -1,0 +1,79 @@
+---
+title: "House Selling"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(pander)
+library(DT)
+train <- read.csv("../Data/train.csv")
+```
+
+
+```{r}
+n <- nrow(train)
+n
+
+0.6 * n
+keep <- sample(1:n, 876)
+
+mytrain <- train[keep,]
+mytest <- train[-keep,]
+
+#lm13f <- lm(SalePrice ~ +X1stFlrSF + X2ndFlrSF + YearBuilt + YearRemodAdd + TotalBsmtSF +  OverallCond + BsmtUnfSF + MiscFeature, data = mytrain)
+
+lm8f <- lm(SalePrice ~ +X1stFlrSF  + 
++     X2ndFlrSF +GrLivArea + GarageArea + WoodDeckSF + YearBuilt + 
++     YearRemodAdd + TotalBsmtSF + SaleType, data = mytrain)
+```
+
+```{r}
+# Compute R-squared for each validation
+
+  # Get y-hat for each model on new data.
+  hht <- predict(lm8f, newdata=mytest)
+  
+  # Compute y-bar
+  ybar <- mean(mytest$SalePrice) #Yi is given by Ynew
+  
+  # Compute SSTO
+  SSTO <- sum( (mytest$SalePrice - ybar)^2 )
+  
+  # Compute SSE for each model
+  SSEt <- sum( (mytest$SalePrice - hht)^2 )
+  
+  # Compute R-squared for each
+  rst <- 1 - SSEt/SSTO
+  
+  # Compute adjusted R-squared for each
+  n <- length(mytest$SalePrice)
+  pt <- length(coef(lm8f))
+  
+  rsta <- 1 - (n-1)/(n-pt)*SSEt/SSTO
+
+  
+```
+
+
+| Model   | $R^2$ | Adjusted $R^2$ |
+|---------|-------|----------------|
+Validation    | `r rst`  | `r rsta` |
+True  | `r summary(lm8f)$r.squared` | `r summary(lm8f)$adj.r.squared`|
+
+
+
+```{r}
+plot(SalePrice ~ X1stFlrSF, data = mytrain)
+b<- coef(lm8f)
+x = 1200; x2 = 1100; x3 = 1456; x4=690; x5 = 145; x6 = 2001; x7 = 2012; x8 = 1219; x9 = 0; x10 = 1; x11 = 1; x12= 0; x13 = 1; x14 = 0; x15 = 0; x16 = 0;
+curve(b[1]+(b[2]*x + b[3]*x2 + b[4]*x3 + b[5]*x4 + b[6]*x5 + b[7]*x6 + b[8]*x7 +b[9]*x8 +b[10]*x9 +b[11]*x10 +b[12]*x11 +b[13]*x12 +b[14]*x13 +b[15]*x14 +b[16]*x15 +b[17]*x16), add = TRUE)
+
+pander(summary(lm8f))
+
+```
+
+### Interpretation
+
+If you buy a house with low interest, low down, and a cash warranty deed then we can see the price increase with a price of $8000 as square footage goes up. This is only true if we hold some of the variables constant. These constants are that the house was bought in 2001, remodeled in 2012, has a combined squarefootage of 1300 for the first and second floor. We also need to hold the garage area to a constant of 690 square feet and the deck to 145 square feet.

@@ -1,0 +1,84 @@
+---
+title: "Residuals"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(readr)
+library(pander)
+library(DT)
+laptops <- read.csv("../Data/laptops.csv")
+```
+
+## Background
+
+We're looking at data that was created for laptops. In particular we are looking at the price (in euros) and the size of the laptop screen (in inches). We added my own laptop, which would be 2500 euros and 15 inches, onto the plot to see where it would lie according to the regression line. We will be looking at what a residual, SSR, SSE, SSTO, and R squared is in this analysis. This added point is shown in blue on the plot.
+
+```{r echo=FALSE}
+plot(Inches ~ Price_euros, data = laptops)
+
+laptops.lm <- lm(Inches ~ Price_euros, data = laptops)
+
+abline(laptops.lm)
+
+points(2500, 15, col="skyblue", pch=14)
+```
+
+
+
+
+## SSR
+$$
+  \sum_{i=1}^n (\hat{Y}_i - \bar{Y})^2
+$$
+
+
+```{r echo=FALSE}
+pander(sum( (laptops.lm$fit - mean(laptops$Inches))^2 ))
+```
+
+## SSTO
+$$
+  \sum_{i=1}^n (Y_i - \bar{Y})^2
+$$
+
+```{r echo=FALSE}
+pander(sum( (15 - mean(laptops$Inches))^2 ))
+```
+
+## R-Squared
+$$
+R^2 = \frac{SSR}{SSTO}
+$$
+
+
+```{r echo=FALSE}
+pander(0.06161875) #R2
+```
+
+
+
+## Residuals
+
+Residuals are the difference between the observed Y value and the predicted Y value.
+
+## SSR
+
+The SSR, or the Sum of Squares Regression, measures how much the regression line is deviated from the average Y value line. The SSR of the data point we're looking at is 12.3186. To find the SSR we would get the mean of our Y values and subtrat our linear regressions fit. After that we would square it all and sum it. This would give us our SSR value.
+
+## SSE
+
+The SSE, or Sum of Squared Errors, measures how much the residuals deviate from the regression line. The SSE for th edata point we're looking at would be 12.70368. To find the SSE we would find the fit of the regression, subtract our Y value and then square it all. Once we square it all we would get the sum and that would give us our SSE.
+
+## SSTO
+
+The SSTO, or the Total Sum of Squares, measures how much the Y values deviate from the average Y value. our SSTO for the data point we're looking at is 0.0002955338. We would find the mean of our Y value, then subtract our Y value from it and square it all. The sum of that function will give us our SSTO.
+
+## R-Squared
+
+R squared is the proportion of the variance in Y. It is measured between 0-1. The close the R squared is to 1, the less of a variance the Y value has with the average Y. The opposite is true when the R squared is closer to 0, this means that there is a lot of variance with the Y value. Since our R squared is low, 0.06161875, we would be able to assume that the data points do not follow the movement of the regression line. To find R squared you would either do your SSR divided by your SSTO, or you could do you SSE divided by your SSTO and then subtract 1 from it.
